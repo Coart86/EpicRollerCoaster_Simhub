@@ -1,0 +1,48 @@
+import socket
+from threading import Thread
+import struct
+
+fpacket = bytearray(b'\x01\x00\x00\x00\xa2\xe7\xf2\x0f\xfb\xcf\x04F\xf9\xff\xaeDR\x1e\xaeE}\xd8~?%s\x89@\x9d\n\x04\xc0\x005Z=\xb0\\\x10?L\x7f\x92A\xfd5\xb8\xbeDn\x82;#\x9bj\xbe_\'\x05@/H\x8c="@U\xbb\x86=w?\xb0\x8ar?`\x88I?P\x10\xfc>`\x04\x80\xbc\x0fv\x85\xbc\xec\xb9\x05\xbd\xec\xbe\x91\xbc\x1b\x9fdB\xae/dB8JcB\xc1\x84dB\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x90\xc2\xf5=\x90\xc2\xf5=\x90\xc2\xf5=\x90\xc2\xf5=\xb5\xb4\x7f<\x82\xf8\xae;\xb2\xbdo<\xef\x8aE<o\xed\xb4<br\x8c<\x17\x8b\x12=\xb7\x0f\xb0<\xd2\xc8>=GD7=\xf8M\xeb<\x00\x8aI\xba\xea\r\x00\x00\x03\x00\x00\x00 \x03\x00\x00\x02\x00\x00\x00\x04\x00\x00\x00"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00F\xd8M\xc4_\xaf\x01C\xc2\xeb\x07\xc5<\x91\x92A\\\xf4\xcd\xc6\x99\x9c4\xc2P\xfa\xfeB)\xf6\xffB\x81\x9c\x06C\x81\x9c\x06C`\xc4.\xc1\x00\x00\x80?\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xb1\xde\x10B\x00\x00\x00\x00\x00\x00\x00\x02\x00\x7fA\x00')
+
+HOST = 'localhost'
+EPIC_PORT = 20801
+epic_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+epic_socket.bind((HOST, EPIC_PORT))
+
+FORZA_PORT = 20800
+forza_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+def convert(epic_packet):
+
+    speed = struct.pack('f', epic_packet["S"])
+    new_packet = fpacket[0:256] + speed + fpacket[300:]
+    print('speed : ', speed)
+
+    forza_socket.sendto(new_packet, (HOST, FORZA_PORT))    
+
+
+def receive_epic_packet():
+    print("start receiving Epic Roller Coaster Packets")
+    while True:
+        packet, address = epic_socket.recvfrom(1024)
+        print(bytearray(packet))
+        # print(packet)
+
+        dpacket = packet.decode('utf-8')
+        splited = dpacket.split('[')
+        result = []
+        for h in splited:
+            temp = h.split(']')
+            result = result + temp
+        
+        data = dict()
+        length = int(len(result)/2)
+        for i in range(length) :
+            data[result[2*i]] = float(result[2*i+1])
+        
+        convert(data)
+
+if __name__ == '__main__':
+    t = Thread(target=receive_epic_packet)
+    t.start()
+    
