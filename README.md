@@ -3,5 +3,5 @@ A telemetry data format translator from epic roller coaster telemetry packet to 
 
 Usage:
 1. Epic roller coaster : set telemetry port as 20801
-2. Simhub Forza Horizon 4/5 config : receive packets from 20800
+2. Simhub Forza Horizon 4/5 config : configuration to receive packets from 20800
 3. Enjoy!
